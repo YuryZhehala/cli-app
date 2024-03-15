@@ -16,10 +16,27 @@ type User struct {
 
 const filename = "users.json"
 
-func Register() {
+func RegisterUser() (User, error) {
 	name := utils.StringPrompt("What is your name?")
 	password := utils.PasswordPrompt("What is your password?")
 	email := utils.StringPrompt("What is your email?")
+
+	user, err := CreateUser(name, password, email)
+	if err != nil {
+		return User{}, err
+	}
+
+	return user, nil
+}
+
+func CreateUser(name, password, email string) (User, error) {
+	if len(name) < 3 {
+		return User{}, fmt.Errorf("the name length should be 3 or more characters")
+	}
+
+	if email == "" {
+		return User{}, fmt.Errorf("the email is empty")
+	}
 
 	users := readUsersFromFile()
 
@@ -32,11 +49,10 @@ func Register() {
 	users = append(users, user)
 
 	if err := writeUsersToFile(users); err != nil {
-		fmt.Println("Error:", err)
-		return
+		return User{}, err
 	}
 
-	fmt.Println("User data has been written to users.json file successfully!")
+	return user, nil
 }
 
 func readUsersFromFile() []User {
@@ -70,29 +86,30 @@ func writeUsersToFile(users []User) error {
 	return nil
 }
 
-func Login() {
+func Login() (User, error) {
 	name := utils.StringPrompt("Enter your name?")
+
+	if len(name) < 3 {
+		return User{}, fmt.Errorf("the name length should be 3 or more characters")
+	}
 
 	found, err := findUserByName(name)
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
-
+		return User{}, err
 	}
 
 	if found == nil {
-		fmt.Println("The user was not found")
-		return
+		return User{}, fmt.Errorf("the user was not found")
 	}
 
 	password := utils.PasswordPrompt("Enter your password?")
 
 	if found.Password != password {
 		fmt.Println("Wrong password")
-		return
+		return User{}, fmt.Errorf("wrong password")
 	}
 
-	fmt.Printf("Welcome, %s \n", found.Name)
+	return *found, nil
 }
 
 func findUserByName(name string) (*User, error) {

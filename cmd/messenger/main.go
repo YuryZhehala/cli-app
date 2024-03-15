@@ -19,9 +19,17 @@ func main() {
 
 		switch choice {
 		case 1:
-			user.Register()
+			user, err := user.RegisterUser()
+			if err != nil {
+				fmt.Println("Error:", err)
+			}
+			fmt.Printf("User data has been registered %s", user.Name)
 		case 2:
-			user.Login()
+			user, err := user.Login()
+			if err != nil {
+				fmt.Println("Error:", err)
+			}
+			fmt.Printf("Welcome, %s \n", user.Name)
 		case 3:
 			fmt.Println("Exiting...")
 			return
