@@ -22,14 +22,16 @@ func main() {
 			user, err := user.RegisterUser()
 			if err != nil {
 				fmt.Println("Error:", err)
+			} else {
+				fmt.Printf("User data has been registered %s", user.Name)
 			}
-			fmt.Printf("User data has been registered %s", user.Name)
 		case 2:
 			user, err := user.Login()
 			if err != nil {
 				fmt.Println("Error:", err)
+			} else {
+				fmt.Printf("Welcome, %s \n", user.Name)
 			}
-			fmt.Printf("Welcome, %s \n", user.Name)
 		case 3:
 			fmt.Println("Exiting...")
 			return

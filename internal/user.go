@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slices"
 
 	"github.com/YuryZhehala/cli-app/internal/utils"
 )
@@ -17,9 +18,9 @@ type User struct {
 const filename = "users.json"
 
 func RegisterUser() (User, error) {
+	email := utils.StringPrompt("What is your email?")
 	name := utils.StringPrompt("What is your name?")
 	password := utils.PasswordPrompt("What is your password?")
-	email := utils.StringPrompt("What is your email?")
 
 	user, err := CreateUser(name, password, email)
 	if err != nil {
@@ -30,15 +31,25 @@ func RegisterUser() (User, error) {
 }
 
 func CreateUser(name, password, email string) (User, error) {
-	if len(name) < 3 {
-		return User{}, fmt.Errorf("the name length should be 3 or more characters")
-	}
-
 	if email == "" {
 		return User{}, fmt.Errorf("the email is empty")
 	}
 
+	if len(name) < 3 {
+		return User{}, fmt.Errorf("the name length should be 3 or more characters")
+	}
+
+	if password == "" {
+		return User{}, fmt.Errorf("the password is empty")
+	}
+
 	users := readUsersFromFile()
+
+	idx := slices.IndexFunc(users, func(u User) bool { return u.Email == email })
+
+	if idx != -1 {
+		return User{}, fmt.Errorf("user with this email is already registered")
+	}
 
 	user := User{
 		Name:     name,
@@ -53,6 +64,23 @@ func CreateUser(name, password, email string) (User, error) {
 	}
 
 	return user, nil
+}
+
+func DeleteUser(email string) error {
+	users := readUsersFromFile()
+	idx := slices.IndexFunc(users, func(u User) bool { return u.Email == email })
+
+	if idx == -1 {
+		return fmt.Errorf("user with this email was not found")
+	}
+
+	users = slices.Delete(users, idx, idx+1)
+
+	if err := writeUsersToFile(users); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func readUsersFromFile() []User {
